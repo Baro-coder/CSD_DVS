@@ -92,8 +92,7 @@ int child_processes_init() {
 
 // -- App: Children wait
 void child_processes_wait() {
-    
-    sleep(2);
+    sleep(1);
     kill(getpid(), SIGUSR2);
 
     /* ** Wait for children processes ** */
@@ -102,6 +101,7 @@ void child_processes_wait() {
     }
 }
 
+// -- App: Resources clean
 int clean() {
     /* ** Cleaning ** */
     // -- Pipes shutdown

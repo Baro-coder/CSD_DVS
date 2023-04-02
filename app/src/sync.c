@@ -170,7 +170,6 @@ int distribute_vote(int id, int vote) {
     sem_wait(semaphores[id]);
 
     // Vote distribution
-    printf("-- * Process[%d]: Distributing...", id);
     char* buffer = (char*) malloc(BUFFER_SIZE);
     for (int i = 0; i < voters_count; i++) {
         memset(buffer, 0, BUFFER_SIZE);
@@ -196,7 +195,6 @@ void read_votes(int id, int* votes) {
     sem_wait(semaphores[id]);
 
     // Votes reading
-    printf("-- * Process[%d]: Reading...", id);
     int n_bytes = -1;
     char* buffer = (char*) malloc(BUFFER_SIZE);
     for (int i = 0; i < voters_count; i++) {
@@ -205,7 +203,7 @@ void read_votes(int id, int* votes) {
     }
     free(buffer);
 
-    printf("-- * Process[%d]: Votes:", id);
+    printf("\n-- * Process[%d]: Votes:", id);
     for(int i = 0; i < voters_count; i++) {
         printf(" %d", votes[i]);
     }

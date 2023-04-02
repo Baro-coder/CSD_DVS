@@ -22,7 +22,6 @@ void __sig_handler(int signo) {
         __component_exit();
     } else if (signo == SIGUSR2) {
         // Voting start
-        printf("-- * Process[%d]: Start Voting...\n", id);
         __votingStart = TRUE;
     }
 }
@@ -53,8 +52,9 @@ int __make_decision(int* votes, int votes_count) {
 void __voting_process(int id) {
     // -- Make own vote
     int vote = make_vote(id);
-    printf("-- * Process[%d]: Vote: %d | %d\n", id, vote, (vote % 2));
     vote %= 2;
+
+    printf("-- * Process[%d]: Start voting: [%d]\n", id, vote);
 
     int voters_count = 1;
     // -- Distribute own vote

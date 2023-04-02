@@ -25,7 +25,7 @@ int main(int argc, char** argv) {
     child_processes_wait();
 
     /* *** Cleaning *** */
-    fprintf(stdout, "-- App: Cleaning: ");
+    fprintf(stdout, "\n-- App: Cleaning: ");
     status = clean();
     if (status != 0) {
         fprintf(stdout, "Failure: %d\n", status);

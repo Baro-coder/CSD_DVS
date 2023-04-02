@@ -3,7 +3,6 @@
 
 /* *** Libraries *** */
 #include "app.h"
-#include "prng.h"
 
 /* *** Definitions *** */
 #define CH_READ 0   // pipe channel READ

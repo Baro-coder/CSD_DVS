@@ -1,8 +1,17 @@
-#include <stdio.h>
-
 #ifndef COMPONENT_H
 #define COMPONENT_H
 
-void* component_main(void* arg);
+/* *** Libraries *** */
+#include "app.h"
+
+/* *** Custom libraries *** */
+#include "prng.h"
+
+/* *** Definitions *** */
+
+
+/* *** Declarations *** */
+// -- Functions
+void* component_main();
 
 #endif

@@ -7,6 +7,8 @@ file(GLOB APP_SRC
 
 add_executable(app ${APP_SRC})
 
+set_property(TARGET app PROPERTY C_STANDARD 99)
+
 target_include_directories(app PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(app PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_include_directories(app PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../lib)

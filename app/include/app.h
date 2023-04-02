@@ -15,7 +15,9 @@
 #include <time.h>
 
 /* *** Definitions *** */
-#define THREADS_COUNT_DEFAULT 6
+#define PROCESSES_COUNT_DEFAULT 6
+#define PROCESSES_COUNT_MIN 3
+#define PROCESSES_COUNT_MAX 100
 
 /* *** Declarations *** */
 // ---- Main operations

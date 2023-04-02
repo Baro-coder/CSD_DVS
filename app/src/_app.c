@@ -34,10 +34,10 @@ void __master_sig_handler(int signo) {
 int app_init(int argc, char** argv) {
     // -- Args parse: processesCount
     if (argc == 1) {
-        processesCount = THREADS_COUNT_DEFAULT;
+        processesCount = PROCESSES_COUNT_DEFAULT;
     } else if (argc == 2) {
         processesCount = atoi(argv[1]);
-        if (processesCount == 0) {
+        if (processesCount <  PROCESSES_COUNT_MIN || processesCount > PROCESSES_COUNT_MAX) {
             return 3;
         }
     } else {

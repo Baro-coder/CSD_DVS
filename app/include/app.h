@@ -5,9 +5,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/shm.h>
+#include <semaphore.h>
+#include <fcntl.h>
+#include <time.h>
 
 /* *** Definitions *** */
 #define THREADS_COUNT_DEFAULT 6
@@ -16,6 +21,7 @@
 // ---- Main operations
 int app_init(int argc, char** argv);
 int child_processes_init();
-int child_processes_wait();
+void child_processes_wait();
+int clean();
 
 #endif

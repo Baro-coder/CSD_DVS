@@ -129,7 +129,7 @@ int sync_shutdown(int count) {
 }
 
 // --- Children
-// ---- Make Vote with PRNG
+// ---- Make Vote with random values from `/dev/urandom`
 int make_vote(int id) {
     int vote = 0;   // Vote
 
@@ -154,6 +154,9 @@ int make_vote(int id) {
     }
     fclose(fp);
 
+    vote %= 2;
+    printf("-- * P[%d]: Vote: [%d]\n", id, vote);
+
     sem_post(semaphores[next_id]);
     
     return vote;
@@ -168,6 +171,8 @@ int distribute_vote(int id, int vote) {
 
     // Wait for appropriate semaphore
     sem_wait(semaphores[id]);
+
+    printf("-- * P[%d]: Distributing vote...\n", id);
 
     // Vote distribution
     char* buffer = (char*) malloc(BUFFER_SIZE);
@@ -194,6 +199,8 @@ void read_votes(int id, int* votes) {
     // Wait for appropriate semaphore
     sem_wait(semaphores[id]);
 
+    printf("-- * P[%d]: Reading votes... [", id);
+
     // Votes reading
     int n_bytes = -1;
     char* buffer = (char*) malloc(BUFFER_SIZE);
@@ -203,12 +210,48 @@ void read_votes(int id, int* votes) {
     }
     free(buffer);
 
-    printf("\n-- * Process[%d]: Votes:", id);
     for(int i = 0; i < voters_count; i++) {
         printf(" %d", votes[i]);
     }
-    printf("\n");
+    printf(" ]\n");
 
     // Release next semaphore
     sem_post(semaphores[next_id]);
+}
+// ---- Count votes FOR and AGAINST and make final decision
+int make_decision(int id, int* votes) {
+    // Next process semaphore id
+    int next_id = id + 1;
+    if (next_id == voters_count) {
+        next_id = 0;
+    }
+
+    // Wait for appropriate semaphore
+    sem_wait(semaphores[id]);
+
+    printf("-- * P[%d]: Making decision... [ ", id);
+
+    int votes_for = 0;          // Votes for counter
+    int votes_against = 0;      // Votes against counter
+    
+    // Votes counting
+    for (int i = 0; i < voters_count; i++) {
+        if (votes[i] == VOTE_FOR) {
+            votes_for++;
+        } else if (votes[i] == VOTE_AGAINST) {
+            votes_against++;
+        }
+    }
+
+    printf("For: %d | Against: %d ]\n", votes_for, votes_against);
+
+    // Release next semaphore
+    sem_post(semaphores[next_id]);
+
+    // Making decision
+    if (votes_for > votes_against) {
+        return VOTE_FOR;
+    } else {
+        return VOTE_AGAINST;
+    }
 }

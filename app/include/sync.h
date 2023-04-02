@@ -29,5 +29,6 @@ int sync_shutdown();
 int make_vote(int id);
 int distribute_vote(int id, int vote);
 void read_votes(int id, int* votes);
+int make_decision(int id, int* votes);
 
 #endif

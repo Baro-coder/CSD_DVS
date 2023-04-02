@@ -4,17 +4,17 @@
 /* *** Main driver *** */
 int main(int argc, char** argv) {
     int status = 0;
-    /* *** App INIT *** */
-    fprintf(stdout, "-- App: Init...\n");
+    /* *** Init *** */
+    fprintf(stdout, "-- App: Init: ");
     status = app_init(argc, argv);
     if (status != 0) {
         fprintf(stdout, "Failure: %d\n", status);
         exit(status);
     }
-    // fprintf(stdout, "Done.\n");
+    fprintf(stdout, "Done.\n");
 
     /* *** Children init *** */
-    fprintf(stdout, "-- App: Children init: \n");
+    fprintf(stdout, "-- App: Children init:\n\n");
     status = child_processes_init();
     if (status != 0) {
         fprintf(stdout, "Failure: %d\n", status);
@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
     }
     fprintf(stdout, "Done.\n");
 
-    /* *** App EXIT *** */
+    /* *** Exit *** */
     fprintf(stdout, "-- App: Exit.\n");
     exit(0);
 }

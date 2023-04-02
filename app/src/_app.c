@@ -19,10 +19,13 @@ void __send_broadcast_signal(int signo) {
 // -- Signals: Handler
 void __master_sig_handler(int signo) {
     if(signo == SIGINT) {
+        fprintf(stdout, "\n-- App: Abort!\n");
         __send_broadcast_signal(SIGUSR1);
     } else if (signo == SIGUSR1) {
+        fprintf(stdout, "\n-- App: Abort!\n");
         __send_broadcast_signal(signo);
     } else if (signo == SIGUSR2) {
+        fprintf(stdout, "\n-- App: Start Voting.\n\n");
         __send_broadcast_signal(signo);
     }
 }
@@ -92,7 +95,10 @@ int child_processes_init() {
 
 // -- App: Children wait
 void child_processes_wait() {
+    /* ** Voting init ** */
+    // -- Delay (for children init)
     sleep(1);
+    // -- Voting start signal
     kill(getpid(), SIGUSR2);
 
     /* ** Wait for children processes ** */

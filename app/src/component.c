@@ -18,8 +18,8 @@ void __sig_handler(int signo) {
     
     if (signo == SIGUSR1) {
         // Abort
-        printf("-- * Process[%d]: Abort!\n", id);
-        __component_exit();
+        printf("-- * P[%d]: Abort!\n", id);
+        __component_exit(-1);
     } else if (signo == SIGUSR2) {
         // Voting start
         __votingStart = TRUE;
@@ -27,34 +27,10 @@ void __sig_handler(int signo) {
 }
 
 // -- Voting
-// ---- Decision
-int __make_decision(int* votes, int votes_count) {
-    int votes_for = 0;          // Votes for counter
-    int votes_against = 0;      // Votes against counter
-    
-    // Votes counting
-    for (int i = 0; i < votes_count; i++) {
-        if (votes[i] == VOTE_FOR) {
-            votes_for++;
-        } else if (votes[i] == VOTE_AGAINST) {
-            votes_against++;
-        }
-    }
-
-    // Making decision
-    if (votes_for > votes_against) {
-        return VOTE_FOR;
-    } else {
-        return VOTE_AGAINST;
-    }
-}
 // ---- Process
 void __voting_process(int id) {
     // -- Make own vote
     int vote = make_vote(id);
-    vote %= 2;
-
-    printf("-- * Process[%d]: Start voting: [%d]\n", id, vote);
 
     int voters_count = 1;
     // -- Distribute own vote
@@ -66,40 +42,40 @@ void __voting_process(int id) {
 
     // -- Make final decision
     int decision = -1;
-    decision = __make_decision(votes, voters_count);
-    printf("-- * Process[%d]: Decision: %d\n", id, decision);
+    decision = make_decision(id, votes);
+    // printf("-- * P[%d]: Decision: %d\n", id, decision);
+
+    // -- Exit with: status == decision
+    __component_exit(decision);
 }
 
 
 // -- Component Process Init
 void __component_init(int id) {
+    printf("-- * P[%d]: Init.\n", id);
+
     // -- Signals handler
     signal(SIGINT, SIG_IGN);
     signal(SIGUSR1, __sig_handler);
     signal(SIGUSR2, __sig_handler);
-
-    // Initial delay
-    usleep(500);
-    printf("-- * Process[%d]: Ready\n", id);
 }
 // -- Component Process Waiting
 void __component_wait(int id) {
-    printf("-- * Process[%d]: Waiting...\n", id);
+    printf("-- * P[%d]: Ready.\n", id);
     while(1) { 
         // Waiting for signal to
         //  - abort:            SIGUSR1
         //  - start voting:     SIGUSR2
         if (__votingStart) {
             __voting_process(id);
-            break;
         }
     }
 }
 // -- Component Process Exit
-void __component_exit() {
+void __component_exit(int status) {
     int id = getpid() - getppid() - 1;
-    printf("-- * Process[%d]: Exit.\n", id);
-    exit(0);
+    printf("-- * P[%d]: Exit: Decision: [%d]\n", id, status);
+    exit(status);
 }
 
 
@@ -116,7 +92,7 @@ void* component_main() {
     __component_wait(id);
 
     /* *** EXIT *** */
-    __component_exit();
+    __component_exit(0);
 
     return NULL;
 }

@@ -2,10 +2,10 @@
 
 // -- GLOBALS --
 // -- Timer
-static sem_t* mtx;
+static sem_t* mtx = NULL;
 
 // -- Log levels
-static char* __LEVEL_NAMES[] = {
+const char* __LEVEL_NAMES[] = {
     "DEBUG",
     "INFO",
     "WARNING",
@@ -15,7 +15,9 @@ static char* __LEVEL_NAMES[] = {
 
 // -- PRIVATE --
 void __log_preprint(int level, const char* owner) {
-    sem_wait(mtx);
+    if (mtx != NULL) {
+        sem_wait(mtx);
+    }
 
     time_t now;
     time(&now);
@@ -33,16 +35,25 @@ void __log_preprint(int level, const char* owner) {
 }
 
 // -- PUBLIC --
-// ---- MUTEX
-int logging_init(void) {
-    mtx = sem_open("/sem.liblogs", O_CREAT | O_EXCL, 0666, 1);
-
+// ---- Binary semaphore init
+int logging_threads_safety_enable(const char* sem_name) {
+    mtx = sem_open(sem_name, O_CREAT | O_EXCL, 0666, 1);
+    if (mtx == SEM_FAILED) {
+        return 1;
+    }
     return 0;
 }
 
-int logging_clean(void) {
-    sem_unlink("/sem.liblogs");
-    sem_close(mtx);
+// ---- Binary semaphore destroy
+int logging_threads_safety_clear(const char* sem_name) {
+    if (sem_unlink(sem_name) < 0) {
+        return 1;
+    }
+    if (sem_close(mtx) < 0) {
+        return 2;
+    }
+
+    mtx = NULL;
 
     return 0;
 }
@@ -57,7 +68,9 @@ void log_debug(const char* owner, const char* fmt, ...) {
     fputc('\n', stderr);
     va_end(args);
 
-    sem_post(mtx);
+    if(mtx != NULL) {
+        sem_post(mtx);
+    }
 }
 
 // ---- INFO LOG
@@ -70,7 +83,9 @@ void log_info(const char* owner, const char* fmt, ...) {
     fputc('\n', stderr);
     va_end(args);
 
-    sem_post(mtx);
+    if(mtx != NULL) {
+        sem_post(mtx);
+    }
 }
 
 // ---- WARNING LOG
@@ -83,7 +98,9 @@ void log_warn(const char* owner, const char* fmt, ...) {
     fputc('\n', stderr);
     va_end(args);
 
-    sem_post(mtx);
+    if(mtx != NULL) {
+        sem_post(mtx);
+    }
 }
 
 // ---- ERROR LOG
@@ -96,7 +113,9 @@ void log_error(const char* owner, const char* fmt, ...) {
     fputc('\n', stderr);
     va_end(args);
 
-    sem_post(mtx);
+    if(mtx != NULL) {
+        sem_post(mtx);
+    }
 }
 
 // ---- FATAL LOG
@@ -109,5 +128,7 @@ void log_fatal(const char* owner, const char* fmt, ...) {
     fputc('\n', stderr);
     va_end(args);
 
-    sem_post(mtx);
+    if(mtx != NULL) {
+        sem_post(mtx);
+    }
 }

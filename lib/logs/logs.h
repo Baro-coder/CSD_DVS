@@ -21,23 +21,29 @@
 
 /* *** Functions *** */
 // -- Sync
-int logging_init(void);
-int logging_clean(void);
 
-// -- Print log
-// ---- log level: DEBUG
+// Creating semaphore with name as `sem_name` to sync threads printing. 
+//  Returns: `0` on success; `1` - sem_open error
+int logging_threads_safety_enable(const char* sem_name);
+
+// Removing semaphore with name as `sem_name` to sync threads printing.
+//  Returns: `0` on success; `1` - sem_unlink error; `2` - sem_close error
+int logging_threads_safety_clear(const char* sem_name);
+
+
+// log level: DEBUG
 void log_debug(const char* owner, const char* fmt, ...);
 
-// ---- log level: INFO
+// log level: INFO
 void log_info(const char* owner, const char* fmt, ...);
 
-// ---- log level: WARNING
+// log level: WARNING
 void log_warn(const char* owner, const char* fmt, ...);
 
-// ---- log level: ERROR
+// log level: ERROR
 void log_error(const char* owner, const char* fmt, ...);
 
-// ---- log level: FATAL
+// log level: FATAL
 void log_fatal(const char* owner, const char* fmt, ...);
 
 #endif

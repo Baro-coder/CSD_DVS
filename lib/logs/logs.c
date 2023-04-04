@@ -2,7 +2,7 @@
 
 // -- GLOBALS --
 // -- Timer
-static pthread_mutex_t mtx;
+static sem_t* mtx;
 
 // -- Log levels
 static char* __LEVEL_NAMES[] = {
@@ -15,7 +15,7 @@ static char* __LEVEL_NAMES[] = {
 
 // -- PRIVATE --
 void __log_preprint(int level, const char* owner) {
-    // pthread_mutex_lock(&mtx);
+    sem_wait(mtx);
 
     time_t now;
     time(&now);
@@ -35,12 +35,15 @@ void __log_preprint(int level, const char* owner) {
 // -- PUBLIC --
 // ---- MUTEX
 int logging_init(void) {
-    pthread_mutex_init(&mtx, NULL);
+    mtx = sem_open("/sem.liblogs", O_CREAT | O_EXCL, 0666, 1);
+
     return 0;
 }
 
 int logging_clean(void) {
-    pthread_mutex_destroy(&mtx);
+    sem_unlink("/sem.liblogs");
+    sem_close(mtx);
+
     return 0;
 }
 
@@ -54,7 +57,7 @@ void log_debug(const char* owner, const char* fmt, ...) {
     fputc('\n', stderr);
     va_end(args);
 
-    // pthread_mutex_unlock(&mtx);
+    sem_post(mtx);
 }
 
 // ---- INFO LOG
@@ -67,7 +70,7 @@ void log_info(const char* owner, const char* fmt, ...) {
     fputc('\n', stderr);
     va_end(args);
 
-    // pthread_mutex_unlock(&mtx);
+    sem_post(mtx);
 }
 
 // ---- WARNING LOG
@@ -80,7 +83,7 @@ void log_warn(const char* owner, const char* fmt, ...) {
     fputc('\n', stderr);
     va_end(args);
 
-    // pthread_mutex_unlock(&mtx);
+    sem_post(mtx);
 }
 
 // ---- ERROR LOG
@@ -93,7 +96,7 @@ void log_error(const char* owner, const char* fmt, ...) {
     fputc('\n', stderr);
     va_end(args);
 
-    // pthread_mutex_unlock(&mtx);
+    sem_post(mtx);
 }
 
 // ---- FATAL LOG
@@ -106,5 +109,5 @@ void log_fatal(const char* owner, const char* fmt, ...) {
     fputc('\n', stderr);
     va_end(args);
 
-    // pthread_mutex_unlock(&mtx);
+    sem_post(mtx);
 }

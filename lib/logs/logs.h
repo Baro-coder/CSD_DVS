@@ -6,7 +6,8 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdint.h>
-#include <pthread.h>
+#include <semaphore.h>
+#include <fcntl.h>
 #include <time.h>
 
 /* *** Definitions *** */

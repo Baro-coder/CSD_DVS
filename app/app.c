@@ -69,46 +69,36 @@ int test_main(int argc, char** argv) {
 
 /* *** Main driver *** */
 int main(int argc, char** argv) {
-    
-    return test_main(argc, argv);
-
-    /* *** OLD CODE *** */
-
     int status = 0;
     
     /* *** Init *** */
-    // fprintf(stdout, "-- App: Init: ");
-    // status = app_init(argc, argv);
-    // if (status != 0) {
-    //     fprintf(stdout, "Failure: %d\n", status);
-    //     exit(status);
-    // }
-    // fprintf(stdout, "Done.\n");
+    log_info("App", "Main init...");
+    status = app_init(argc, argv);
+    if (status != 0) {
+        log_error("App", "Main init error! Code: %d", status);
+        exit(status);
+    }
 
-    // /* *** Children init *** */
-    // fprintf(stdout, "-- App: Children init:\n");
-    // status = child_processes_init();
-    // if (status != 0) {
-    //     fprintf(stdout, "Failure: %d\n", status);
-    //     exit(status);
-    // }
+    /* *** Children init *** */
+    log_info("App", "Components Pre-init...");
+    status = child_processes_init();
+    if (status != 0) {
+        log_error("App", "Components Pre-init error! Code: %d", status);
+        exit(status);
+    }
 
-    // /* *** Children wait *** */
-    // child_processes_wait();
+    /* *** Children wait *** */
+    child_processes_wait();
 
-    // /* *** Cleaning *** */
-    // fprintf(stdout, "\n-- App: Cleaning: ");
-    // status = clean();
-    // if (status != 0) {
-    //     fprintf(stdout, "Failure: %d\n", status);
-    //     exit(status);
-    // }
-    // fprintf(stdout, "Done.\n");
+    /* *** Cleaning *** */
+    log_info("App", "Cleaning...");
+    status = clean();
+    if (status != 0) {
+        log_error("App", "Cleaning error! Code: %d", status);
+        exit(status);
+    }
 
-    // /* *** Exit *** */
-    // fprintf(stdout, "-- App: Exit.\n");
-
-    // exit(0);
-
-    /* *** OLD CODE *** */
+    /* *** Exit *** */
+    log_info("App", "Shutdown.");
+    exit(0);
 }

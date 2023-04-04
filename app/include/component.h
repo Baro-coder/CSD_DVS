@@ -6,6 +6,6 @@
 
 /* *** Declarations *** */
 // -- Functions
-void* component_main(int malfunctioned);
+void* component_main(int id, int malfunctioned);
 
 #endif

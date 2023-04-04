@@ -128,8 +128,8 @@ int sync_shutdown(int count) {
     return 0;
 }
 
-// --- Children
-int make_vote(int id) {
+// --- Components
+int make_vote(const int id, const char* name) {
     int vote = 0;   // Vote
 
     // Next process semaphore id
@@ -154,14 +154,14 @@ int make_vote(int id) {
     fclose(fp);
 
     vote %= 2;
-    printf("-- * P[%d]: Vote: [%d]\n", id, vote);
+    log_info(name, "Vote: %d", vote);
 
     sem_post(semaphores[next_id]);
     
     return vote;
 }
 
-int distribute_vote(int id, int vote, int malfunctioned) {
+int distribute_vote(const int id, const char* name, int vote, int malfunctioned) {
     // Next process semaphore id
     int next_id = id + 1;
     if (next_id == voters_count) {
@@ -171,7 +171,7 @@ int distribute_vote(int id, int vote, int malfunctioned) {
     // Wait for appropriate semaphore
     sem_wait(semaphores[id]);
 
-    printf("-- * P[%d]: Distributing vote...\n", id);
+    log_info(name, "Distributing vote...");
 
     // Vote distribution
     char* buffer = (char*) malloc(BUFFER_SIZE);
@@ -194,7 +194,7 @@ int distribute_vote(int id, int vote, int malfunctioned) {
     return voters_count;
 }
 
-void read_votes(int id, int* votes) {
+void read_votes(const int id, const char* name, int* votes) {
     // Next process semaphore id
     int next_id = id + 1;
     if (next_id == voters_count) {
@@ -204,7 +204,7 @@ void read_votes(int id, int* votes) {
     // Wait for appropriate semaphore
     sem_wait(semaphores[id]);
 
-    printf("-- * P[%d]: Reading votes... [", id);
+    log_info(name, "Reading votes...");
 
     // Votes reading
     int n_bytes = -1;
@@ -216,16 +216,16 @@ void read_votes(int id, int* votes) {
     }
     free(buffer);
 
-    for(int i = 0; i < voters_count; i++) {
-        printf(" %d", votes[i]);
-    }
-    printf(" ]\n");
+    // for(int i = 0; i < voters_count; i++) {
+    //     printf(" %d", votes[i]);
+    // }
+    // printf(" ]\n");
 
     // Release next semaphore
     sem_post(semaphores[next_id]);
 }
 
-void distribute_votes_table(int id, int votes_count, int* votes_table) {
+void distribute_votes_table(const int id, const char* name, int votes_count, int* votes_table) {
     // Next process semaphore id
     int next_id = id + 1;
     if (next_id == votes_count) {
@@ -235,7 +235,7 @@ void distribute_votes_table(int id, int votes_count, int* votes_table) {
     // Wait for appropriate semaphore
     sem_wait(semaphores[id]);
 
-    printf("-- * P[%d]: Distributing votes table...\n", id);
+    log_info(name, "Distributing votes table...");
 
     // Votes table distribution
     char* buffer = (char*) malloc(BUFFER_SIZE);
@@ -253,7 +253,7 @@ void distribute_votes_table(int id, int votes_count, int* votes_table) {
     sem_post(semaphores[next_id]);
 }
 
-void read_votes_tables(int id, int votes_count, int** votes_tables) {
+void read_votes_tables(const int id, const char* name, int votes_count, int** votes_tables) {
     // Next process semaphore id
     int next_id = id + 1;
     if (next_id == votes_count) {
@@ -263,7 +263,7 @@ void read_votes_tables(int id, int votes_count, int** votes_tables) {
     // Wait for appropriate semaphore
     sem_wait(semaphores[id]);
 
-    printf("-- * P[%d]: Reading votes tables...\n", id);
+    log_info(name, "Reading votes tables...");
 
     // Votes reading
     int n_bytes = -1;
@@ -282,7 +282,7 @@ void read_votes_tables(int id, int votes_count, int** votes_tables) {
     sem_post(semaphores[next_id]);
 }
 
-int make_decision(int id, int votes_count, int** votes_tables) {
+int make_decision(const int id, const char* name, int votes_count, int** votes_tables) {
     // Next process semaphore id
     int next_id = id + 1;
     if (next_id == voters_count) {
@@ -292,9 +292,9 @@ int make_decision(int id, int votes_count, int** votes_tables) {
     // // Wait for appropriate semaphore
     sem_wait(semaphores[id]);
 
-    printf("-- * P[%d]: Making decision... \n", id);
+    log_info(name, "Making decision...");
     
-    printf("------ * P[%d]: Checking for malfunctions... [ ", id);
+    log_debug(name, "Checking for malfunctions...");
 
     int* malfunctions = (int*) malloc(votes_count * sizeof(int));
     memset(malfunctions, 0, votes_count * sizeof(int));
@@ -309,21 +309,21 @@ int make_decision(int id, int votes_count, int** votes_tables) {
         }
     }
 
-    for(i = 0; i < votes_count; i++) {
-        if (malfunctions[i]) {
-            printf("%d", i);
-        } else {
-            printf("*");
-        }
-        printf(" ");
-    }
-    printf("]\n");
+    // for(i = 0; i < votes_count; i++) {
+    //     if (malfunctions[i]) {
+    //         printf("%d", i);
+    //     } else {
+    //         printf("*");
+    //     }
+    //     printf(" ");
+    // }
+    // printf("]\n");
 
     int votes_for = 0;
     int votes_against = 0;
     int votes_ignored = 0;
 
-    printf("------ * P[%d]: Votes counting... [ ", id);
+    log_debug(name, "Votes counting...");
     for (i = 0; i < votes_count; i++) {
         if (malfunctions[i] == 0) {
             if (votes_tables[0][i] == VOTE_FOR) {
@@ -342,7 +342,11 @@ int make_decision(int id, int votes_count, int** votes_tables) {
     sem_post(semaphores[next_id]);
 
     // Making decision
-    printf("FOR: %d | AGAINST: %d | IGNORED: %d]\n", votes_for, votes_against, votes_ignored);
+    log_debug(name, "Counted votes: FOR(%d), AGAINST(%d), IGNORED(%d)", 
+        votes_for,
+        votes_against,
+        votes_ignored);
+    
     if (votes_for > (votes_against + votes_ignored)) {
         return VOTE_FOR;
     } else {

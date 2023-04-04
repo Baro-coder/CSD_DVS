@@ -2,14 +2,17 @@
 #include "sync.h"
 #include "votes.h"
 
+#define NAME_BUFF_SIZE 8
+
 /* *** Declarations *** */
 void __component_exit();
 
 
 /* *** Global Variables *** */
+int __id = -1;
 int __malfunctioned = 0;
 int __votingStart = 0;
-
+char __name[NAME_BUFF_SIZE];
 
 /* *** Functions*** */
 // PRIVATE
@@ -19,7 +22,7 @@ void __sig_handler(int signo) {
     
     if (signo == SIGUSR1) {
         // Abort
-        printf("-- * P[%d]: Abort!\n", id);
+        log_info(__name, "Abort!");
         __component_exit(-1);
     } else if (signo == SIGUSR2) {
         // Voting start
@@ -29,20 +32,20 @@ void __sig_handler(int signo) {
 
 // -- Voting
 // ---- Process
-void __voting_process(int id) {
+void __voting_process() {
     // -- Make own vote
-    int vote = make_vote(id);
+    int vote = make_vote(__id, __name);
 
     int voters_count = 1;
     // -- Distribute own vote
-    voters_count = distribute_vote(id, vote, __malfunctioned);
+    voters_count = distribute_vote(__id, __name, vote, __malfunctioned);
 
     // -- Read others votes
     int* votes = (int*) malloc(voters_count * sizeof(int));
-    read_votes(id, votes);
+    read_votes(__id, __name, votes);
 
     // -- Distribute votes table
-    distribute_votes_table(id, voters_count, votes);
+    distribute_votes_table(__id, __name, voters_count, votes);
 
     // -- Read others votes tables
     int** votes_tables = (int**) malloc(voters_count * sizeof(int*));
@@ -50,12 +53,11 @@ void __voting_process(int id) {
         votes_tables[i] = (int*) malloc(voters_count * sizeof(int));
     }
 
-    read_votes_tables(id, voters_count, votes_tables);
+    read_votes_tables(__id, __name, voters_count, votes_tables);
 
     // -- Make final decision
     int decision = -1;
-    decision = make_decision(id, voters_count, votes_tables);
-    // printf("-- * P[%d]: Decision: %d\n", id, decision);
+    decision = make_decision(__id, __name, voters_count, votes_tables);
 
     // -- Memory free
     free(votes);
@@ -71,7 +73,13 @@ void __voting_process(int id) {
 
 // -- Component Process Init
 void __component_init(int id, int malfunctioned) {
-    printf("-- * P[%d]: Init.\n", id);
+    // -- ID and NAME
+    memset(__name, 0, NAME_BUFF_SIZE);
+    sprintf(__name, "C-%d", id);
+
+    log_info(__name, "Init...");
+
+    __id = id;
 
     // -- Malfuntion
     __malfunctioned = malfunctioned;
@@ -82,36 +90,33 @@ void __component_init(int id, int malfunctioned) {
     signal(SIGUSR2, __sig_handler);
 }
 // -- Component Process Waiting
-void __component_wait(int id) {
-    printf("-- * P[%d]: Ready.\n", id);
+void __component_wait() {
+    log_info(__name, "Ready.");
+
     while(1) { 
         // Waiting for signal to
         //  - abort:            SIGUSR1
         //  - start voting:     SIGUSR2
         if (__votingStart) {
-            __voting_process(id);
+            __voting_process();
         }
     }
 }
 // -- Component Process Exit
 void __component_exit(int status) {
-    int id = getpid() - getppid() - 1;
-    printf("-- * P[%d]: Exit: Decision: [%d]\n", id, status);
+    log_info(__name, "Exit: Decision => %d", status);
     exit(status);
 }
 
 
 // PUBLIC
 // -- Component Main Driver
-void* component_main(int malfunctioned) {
-    // Current thread ID
-    int id = getpid() - getppid() - 1;
-
+void* component_main(int id, int malfunctioned) {
     /* *** INIT *** */
     __component_init(id, malfunctioned);
 
     /* *** WORK *** */
-    __component_wait(id);
+    __component_wait();
 
     /* *** EXIT *** */
     __component_exit(0);

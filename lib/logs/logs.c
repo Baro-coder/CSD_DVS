@@ -6,11 +6,11 @@ static sem_t* mtx = NULL;
 
 // -- Log levels
 const char* __LEVEL_NAMES[] = {
-    "DEBUG",
-    "INFO",
+    " DEBUG ",
+    " INFO  ",
     "WARNING",
-    "ERROR",
-    "FATAL"
+    " ERROR ",
+    " FATAL "
 };
 
 // -- PRIVATE --

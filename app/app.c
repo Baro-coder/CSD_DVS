@@ -3,6 +3,13 @@
 
 /* *** Main driver *** */
 int main(int argc, char** argv) {
+    // int a = 3;
+    // double n = ((double)a - 1) / 3;
+    // int np = (int)n;
+    // printf("a  = %d\n", a);
+    // printf("n  = %f\n", n);
+    // printf("np = %d\n", np);
+
     int status = 0;
     /* *** Init *** */
     fprintf(stdout, "-- App: Init: ");
@@ -14,7 +21,7 @@ int main(int argc, char** argv) {
     fprintf(stdout, "Done.\n");
 
     /* *** Children init *** */
-    fprintf(stdout, "-- App: Children init:\n\n");
+    fprintf(stdout, "-- App: Children init:\n");
     status = child_processes_init();
     if (status != 0) {
         fprintf(stdout, "Failure: %d\n", status);

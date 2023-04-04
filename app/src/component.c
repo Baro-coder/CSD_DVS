@@ -7,7 +7,8 @@ void __component_exit();
 
 
 /* *** Global Variables *** */
-int __votingStart = FALSE;
+int __malfunctioned = 0;
+int __votingStart = 0;
 
 
 /* *** Functions*** */
@@ -22,7 +23,7 @@ void __sig_handler(int signo) {
         __component_exit(-1);
     } else if (signo == SIGUSR2) {
         // Voting start
-        __votingStart = TRUE;
+        __votingStart = 1;
     }
 }
 
@@ -34,16 +35,34 @@ void __voting_process(int id) {
 
     int voters_count = 1;
     // -- Distribute own vote
-    voters_count = distribute_vote(id, vote);
+    voters_count = distribute_vote(id, vote, __malfunctioned);
 
     // -- Read others votes
     int* votes = (int*) malloc(voters_count * sizeof(int));
     read_votes(id, votes);
 
+    // -- Distribute votes table
+    distribute_votes_table(id, voters_count, votes);
+
+    // -- Read others votes tables
+    int** votes_tables = (int**) malloc(voters_count * sizeof(int*));
+    for (int i = 0; i < voters_count; i++) {
+        votes_tables[i] = (int*) malloc(voters_count * sizeof(int));
+    }
+
+    read_votes_tables(id, voters_count, votes_tables);
+
     // -- Make final decision
     int decision = -1;
-    decision = make_decision(id, votes);
+    decision = make_decision(id, voters_count, votes_tables);
     // printf("-- * P[%d]: Decision: %d\n", id, decision);
+
+    // -- Memory free
+    free(votes);
+    for (int i = 0; i < voters_count; i++) {
+        free(votes_tables[i]);
+    }
+    free(votes_tables);
 
     // -- Exit with: status == decision
     __component_exit(decision);
@@ -51,8 +70,11 @@ void __voting_process(int id) {
 
 
 // -- Component Process Init
-void __component_init(int id) {
+void __component_init(int id, int malfunctioned) {
     printf("-- * P[%d]: Init.\n", id);
+
+    // -- Malfuntion
+    __malfunctioned = malfunctioned;
 
     // -- Signals handler
     signal(SIGINT, SIG_IGN);
@@ -81,12 +103,12 @@ void __component_exit(int status) {
 
 // PUBLIC
 // -- Component Main Driver
-void* component_main() {
+void* component_main(int malfunctioned) {
     // Current thread ID
     int id = getpid() - getppid() - 1;
 
     /* *** INIT *** */
-    __component_init(id);
+    __component_init(id, malfunctioned);
 
     /* *** WORK *** */
     __component_wait(id);

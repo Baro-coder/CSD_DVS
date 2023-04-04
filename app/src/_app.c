@@ -74,12 +74,25 @@ int child_processes_init() {
     }
 
     /* *** Children create and start *** */
+    // -- Malfunctioned component count
+    int mal_count = (int)(((double)processesCount - 1) / 3);
+    int malfunctioned = 0;
+    printf("---- App: Malfunctioned component count: %d\n\n", mal_count);
+
+    // -- Children fork
+    srand(time(NULL));
     pid_t pid = -1;
     for(i = 0; i < processesCount; i++) {
+        malfunctioned = 0;
+        if (mal_count > 0) {
+            mal_count--;
+            malfunctioned = 1;
+        }
+
         pid = fork();
         if (pid == 0) { 
             // Child process
-            component_main();
+            component_main(malfunctioned);
         } else if (pid == -1) {
             // fork(): error -- Abort
             __send_broadcast_signal(SIGINT);

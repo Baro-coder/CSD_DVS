@@ -7,28 +7,39 @@
 /* *** Definitions *** */
 #define CH_READ 0   // pipe channel READ
 #define CH_WRITE 1  // pipe channel WRITE
-
-#define TRUE 1      // bool True  value
-#define FALSE 0     // bool False value
-
 #define BUFFER_SIZE 5   // Pipe message buffer size [B]
 
 
 /* *** Declarations *** */
+
 // -- Functions
 
 // ---- Pipes
 int pipes_init();
 int pipes_shutdown();
 
-// ---- Sync (Semaphores)
+// ---- Sync (Semaphores and shared memory)
 int sync_init();
 int sync_shutdown();
 
 // ---- Children
+// ---- * Returns randomly generated value [0, 1]
 int make_vote(int id);
-int distribute_vote(int id, int vote);
+
+// ---- * Distributes generated vote over each component and returns `voter_count`
+int distribute_vote(int id, int vote, int malfunctioned);
+
+// ---- * Reads all received votes from pipe and store into `votes`
 void read_votes(int id, int* votes);
-int make_decision(int id, int* votes);
+
+// ---- * Distribute generated vote over each component
+void distribute_votes_table(int id, int votes_count, int* votes_table);
+
+// ---- * Reads all received votes tables from pipes and store into `votes_tables`
+void read_votes_tables(int id, int votes_count, int** votes_tables);
+
+// ---- * Analyze `votes_table`, check for malfunctions and make final decision
+int make_decision(int id, int votes_count, int** votes_tables);
+
 
 #endif

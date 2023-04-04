@@ -12,6 +12,7 @@ int main(int argc, char** argv) {
 
     int status = 0;
     /* *** Init *** */
+    log_info("App", "Init...");
     fprintf(stdout, "-- App: Init: ");
     status = app_init(argc, argv);
     if (status != 0) {

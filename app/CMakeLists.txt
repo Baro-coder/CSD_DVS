@@ -7,7 +7,9 @@ file(GLOB APP_SRC
 
 add_executable(app ${APP_SRC})
 
-set_property(TARGET app PROPERTY C_STANDARD 99)
+set_property(TARGET app PROPERTY C_STANDARD 11)
+
+target_link_libraries(app LINK_PUBLIC logs)
 
 target_include_directories(app PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(app PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)

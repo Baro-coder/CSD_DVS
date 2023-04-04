@@ -1,17 +1,20 @@
 #include "app.h"
 #include "component.h"
+#include "logs.h"
 #include "sync.h"
 
 /* *** Global variables *** */
 int processesCount;     // processes count
-pid_t* pids;            // PIDs array
+pid_t* pids = NULL;     // PIDs array
 
 /* *** Functions *** */
 // -- Signals: Broadcast
 void __send_broadcast_signal(int signo) {
-    for(int i = 0; i < processesCount; i++) {
-        if (pids[i] != -1) {
-            kill(pids[i], signo);
+    if(pids != NULL) {
+        for(int i = 0; i < processesCount; i++) {
+            if (pids[i] != -1) {
+                kill(pids[i], signo);
+            }
         }
     }
 }
@@ -19,28 +22,30 @@ void __send_broadcast_signal(int signo) {
 // -- Signals: Handler
 void __master_sig_handler(int signo) {
     if(signo == SIGINT) {
-        log_info("App", "Signal received: %d | Abort!", signo);
+        log_info(MASTER_NAME, "Signal received: %d | Abort!", signo);
         __send_broadcast_signal(SIGUSR1);
     } else if (signo == SIGUSR1) {
-        log_info("App", "Signal received: %d | Abort!", signo);
+        log_info(MASTER_NAME, "Signal received: %d | Abort!", signo);
         __send_broadcast_signal(signo);
     } else if (signo == SIGUSR2) {
-        log_info("App", "Signal received: %d | Voting start.", signo);
+        log_info(MASTER_NAME, "Signal received: %d | Voting start.", signo);
         __send_broadcast_signal(signo);
     } else {
-        log_warn("App", "Signal received: %d | Signal ignored.", signo);
+        log_warn(MASTER_NAME, "Signal received: %d | Signal ignored.", signo);
     }
 }
 
 // -- App: Main init
 int app_init(int argc, char** argv) {
+    log_info(MASTER_NAME, "Main init...");
+
     // -- liblogs thread-safety semaphore create
     if (logging_threads_safety_enable("/sem.liblogs") != 0) {
         return 1;
     }
 
     // -- Args parse: processesCount
-    log_debug("App", "Args parsing...");
+    log_debug(MASTER_NAME, "Args parsing...");
     if (argc == 1) {
         processesCount = PROCESSES_COUNT_DEFAULT;
     } else if (argc == 2) {
@@ -53,19 +58,19 @@ int app_init(int argc, char** argv) {
     }
 
     // -- Signals handler
-    log_debug("App", "Signals handling...");
+    log_debug(MASTER_NAME, "Signals handling...");
     signal(SIGINT, __master_sig_handler);
     signal(SIGUSR1, __master_sig_handler);
     signal(SIGUSR2, __master_sig_handler);
 
     // -- Pipes
-    log_debug("App", "Pipes init...");
+    log_debug(MASTER_NAME, "Pipes init...");
     if (pipes_init(processesCount)) {
         return 3;
     }
 
     // -- Semaphores
-    log_debug("App", "Control mechanisms init...");
+    log_debug(MASTER_NAME, "Control mechanisms init...");
     if (sync_init(processesCount)) {
         return 4;
     }
@@ -75,6 +80,8 @@ int app_init(int argc, char** argv) {
 
 // -- App: Children init
 int child_processes_init() {
+    log_info(MASTER_NAME, "Components Pre-init...");
+
     // Children PIDs array
     pids = (pid_t*) malloc(processesCount * sizeof(pid_t));
 
@@ -89,7 +96,7 @@ int child_processes_init() {
     int mal_count = (int)(((double)processesCount - 1) / 3);
     int malfunctioned = 0;
 
-    log_debug("App", "Malfunctioned components count: %d", mal_count);
+    log_debug(MASTER_NAME, "Malfunctioned components count: %d", mal_count);
 
     // -- Children fork
     srand(time(NULL));
@@ -133,25 +140,39 @@ void child_processes_wait() {
 }
 
 // -- App: Resources clean
-int clean() {
+int clean(int level) {
     /* ** Cleaning ** */
+    log_info(MASTER_NAME, "Cleaning... (%d)", level);
+    // -- liblogs thread-safety semaphore destroy
+    if (level >= 1) {
+        log_debug(MASTER_NAME, "Logging thread-safety clear...");
+        int logthcl_stat = logging_threads_safety_clear("/sem.liblogs");
+        if (logthcl_stat == 1) {
+            return 1;
+        } else if (logthcl_stat == 2) {
+            return 2;
+        }
+    }
+    
     // -- Pipes shutdown
-    if (pipes_shutdown(processesCount) != 0) {
-        return 1;
+    if (level >= 2) {
+        log_debug(MASTER_NAME, "Pipes closing...");
+        if (pipes_shutdown(processesCount) != 0) {
+            return 3;
+        }
+    } else {
+        return 0;
     }
 
     // -- Semaphores shutdown
-    if (sync_shutdown(processesCount) != 0) {
-        return 2;
-    }
-    
-    // -- liblogs thread-safety semaphore destroy
-    int logthcl_stat = logging_threads_safety_clear("/sem.liblogs");
-    if (logthcl_stat == 1) {
-        return 3;
-    } else if (logthcl_stat == 2) {
-        return 4;
+    if (level == 3) {
+        log_debug(MASTER_NAME, "Control mechanisms closing...");
+        if (sync_shutdown(processesCount) != 0) {
+            return 4;
+        } else {
+            return 0;
+        }
     } else {
-        return 0;
+        return 5;
     }
 }

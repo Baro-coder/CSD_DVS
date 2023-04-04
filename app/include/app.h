@@ -21,12 +21,13 @@
 #define PROCESSES_COUNT_DEFAULT 6
 #define PROCESSES_COUNT_MIN 1
 #define PROCESSES_COUNT_MAX 100
+#define MASTER_NAME " App "
 
 /* *** Declarations *** */
 // ---- Main operations
 int app_init(int argc, char** argv);
 int child_processes_init();
 void child_processes_wait();
-int clean();
+int clean(int level);
 
 #endif

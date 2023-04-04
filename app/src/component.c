@@ -75,7 +75,11 @@ void __voting_process() {
 void __component_init(int id, int malfunctioned) {
     // -- ID and NAME
     memset(__name, 0, NAME_BUFF_SIZE);
-    sprintf(__name, "C-%d", id);
+    if(malfunctioned) {
+        sprintf(__name, "*C-%d ", id);
+    } else {
+        sprintf(__name, " C-%d ", id);
+    }
 
     log_info(__name, "Init...");
 

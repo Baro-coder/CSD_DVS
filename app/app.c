@@ -26,26 +26,26 @@ int test_main(int argc, char** argv) {
 
     logging_threads_safety_enable("/sem.liblogs");
 
-    log_info("App", "Init...");
+    log_info(MASTER_NAME, "Init...");
 
     pid_t pids[count];
     pid_t pid = -1;
 
     int i = 0;
     
-    log_info("App", "Forking...");
+    log_info(MASTER_NAME, "Forking...");
     for (; i < count; i++) {
         pid = fork();
         if(pid == 0) {
             exit(p_func(i));
         } else if (pid == -1) {
-            log_error("App", "Fork error: i = %d", i);
+            log_error(MASTER_NAME, "Fork error: i = %d", i);
         } else {
             pids[i] = pid;
         }
     }
 
-    log_info("App", "Waiting...");
+    log_info(MASTER_NAME, "Waiting...");
     int stats[count];
     int stat = -1;
     for(i = 0; i < count; i++) {
@@ -53,14 +53,14 @@ int test_main(int argc, char** argv) {
         stats[i] = stat / 256;
     }
 
-    log_info("App", "Getting results...");
+    log_info(MASTER_NAME, "Getting results...");
     printf(" -- * Stats: [");
     for(i = 0; i < count; i++) {
         printf(" %d", stats[i]);
     }
     printf(" ]\n");
 
-    log_info("App", "Exit.");
+    log_info(MASTER_NAME, "Exit.");
     
     logging_threads_safety_clear("/sem.liblogs");
 
@@ -69,21 +69,49 @@ int test_main(int argc, char** argv) {
 
 /* *** Main driver *** */
 int main(int argc, char** argv) {
-    int status = 0;
+    int status = -1;
+    int aux_status = -1;
     
     /* *** Init *** */
-    log_info("App", "Main init...");
     status = app_init(argc, argv);
-    if (status != 0) {
-        log_error("App", "Main init error! Code: %d", status);
+    if (status == 1) {
+        log_error(MASTER_NAME, "Logging thread-safety init! Code: %d", status);
+        exit(status);
+    } else if (status == 2) {
+        log_error(MASTER_NAME, "Invalid arguments error! Code: %d", status);
+        aux_status = clean(1);
+        if (aux_status != 0) {
+            log_error(MASTER_NAME, "Cleaning error! Code: %d", aux_status);
+            exit(aux_status);
+        }
+        exit(status);
+    } else if (status == 3) {
+        log_error(MASTER_NAME, "Pipes init! Code: %d", status);
+        aux_status = clean(1);
+        if (aux_status != 0) {
+            log_error(MASTER_NAME, "Cleaning error! Code: %d", aux_status);
+            exit(aux_status);
+        }
+        exit(status);
+    } else if (status == 4) {
+        log_error(MASTER_NAME, "Control mechanisms init! Code: %d", status);
+        aux_status = clean(2);
+        if (aux_status != 0) {
+            log_error(MASTER_NAME, "Cleaning error! Code: %d", aux_status);
+            exit(aux_status);
+        }
         exit(status);
     }
 
     /* *** Children init *** */
-    log_info("App", "Components Pre-init...");
     status = child_processes_init();
     if (status != 0) {
-        log_error("App", "Components Pre-init error! Code: %d", status);
+        log_error(MASTER_NAME, "Components Pre-init error! Code: %d", status);
+        aux_status = clean(3);
+        if (aux_status != 0) {
+            log_error(MASTER_NAME, "Cleaning error! Code: %d", aux_status);
+            exit(aux_status);
+        }
         exit(status);
     }
 
@@ -91,14 +119,13 @@ int main(int argc, char** argv) {
     child_processes_wait();
 
     /* *** Cleaning *** */
-    log_info("App", "Cleaning...");
-    status = clean();
+    status = clean(3);
     if (status != 0) {
-        log_error("App", "Cleaning error! Code: %d", status);
+        log_error(MASTER_NAME, "Cleaning error! Code: %d", status);
         exit(status);
     }
 
     /* *** Exit *** */
-    log_info("App", "Shutdown.");
+    log_info(MASTER_NAME, "Shutdown.");
     exit(0);
 }

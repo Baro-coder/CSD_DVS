@@ -16,10 +16,20 @@ static char* __LEVEL_NAMES[] = {
 // -- PRIVATE --
 void __log_preprint(int level, const char* owner) {
     // pthread_mutex_lock(&mtx);
-    time_t now; 
-    char buffer[20];
-    strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", gmtime(&now));
-    fprintf(stderr, "[%s] : [%s] : [%s] : ", buffer, __LEVEL_NAMES[level], owner);
+
+    time_t now;
+    time(&now);
+    struct tm *tm = localtime(&now);
+
+    fprintf(stderr, "[%d-%02d-%02d %02d:%02d:%02d] : [%s] : [%s] : ", 
+        tm->tm_mday, 
+        tm->tm_mon + 1,
+        tm->tm_year + 1900, 
+        tm->tm_hour, 
+        tm->tm_min, 
+        tm->tm_sec, 
+        __LEVEL_NAMES[level], 
+        owner);
 }
 
 // -- PUBLIC --

@@ -19,7 +19,7 @@
 
 /* *** Definitions *** */
 #define PROCESSES_COUNT_DEFAULT 6
-#define PROCESSES_COUNT_MIN 1
+#define PROCESSES_COUNT_MIN 3
 #define PROCESSES_COUNT_MAX 100
 #define MASTER_NAME " App "
 

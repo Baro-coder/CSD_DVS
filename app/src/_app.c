@@ -25,7 +25,7 @@ void __master_sig_handler(int signo) {
         log_info(MASTER_NAME, "Signal received: %d | Abort!", signo);
         __send_broadcast_signal(SIGUSR1);
     } else if (signo == SIGUSR1) {
-        log_info(MASTER_NAME, "Signal received: %d | Abort!", signo);
+        log_error(MASTER_NAME, "Signal received: %d | Abort!", signo);
         __send_broadcast_signal(signo);
     } else if (signo == SIGUSR2) {
         log_info(MASTER_NAME, "Signal received: %d | Voting start.", signo);
@@ -93,7 +93,8 @@ int child_processes_init() {
 
     /* *** Children create and start *** */
     // -- Malfunctioned component count
-    int mal_count = (int)(((double)processesCount - 1) / 3);
+    double a = (((double)processesCount - 1) / 3);
+    int mal_count = (int)(a);
     int malfunctioned = 0;
 
     log_debug(MASTER_NAME, "Malfunctioned components count: %d", mal_count);
@@ -121,7 +122,6 @@ int child_processes_init() {
             pids[i] = pid;
         }
     }
-    
     return 0;
 }
 
@@ -143,6 +143,10 @@ void child_processes_wait() {
 int clean(int level) {
     /* ** Cleaning ** */
     log_info(MASTER_NAME, "Cleaning... (%d)", level);
+    
+    // -- Memory
+    free(pids);
+
     // -- liblogs thread-safety semaphore destroy
     if (level >= 1) {
         log_debug(MASTER_NAME, "Logging thread-safety clear...");

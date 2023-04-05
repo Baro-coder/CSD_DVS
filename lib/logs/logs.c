@@ -1,4 +1,5 @@
 #include "logs.h"
+#include <bits/types/time_t.h>
 
 // -- GLOBALS --
 // -- Timer
@@ -19,9 +20,9 @@ void __log_preprint(int level, const char* owner) {
         sem_wait(mtx);
     }
 
-    time_t now;
-    time(&now);
-    struct tm *tm = localtime(&now);
+    time_t *now = (time_t*) malloc(sizeof(time_t));
+    time(now);
+    struct tm *tm = localtime(now);
 
     fprintf(stderr, "[%d-%02d-%02d %02d:%02d:%02d] : [%s] : [%s] : ", 
         tm->tm_mday, 
@@ -32,6 +33,8 @@ void __log_preprint(int level, const char* owner) {
         tm->tm_sec, 
         __LEVEL_NAMES[level], 
         owner);
+
+    free(now);
 }
 
 // -- PUBLIC --
@@ -46,13 +49,13 @@ int logging_threads_safety_enable(const char* sem_name) {
 
 // ---- Binary semaphore destroy
 int logging_threads_safety_clear(const char* sem_name) {
-    if (sem_unlink(sem_name) < 0) {
-        return 1;
-    }
     if (sem_close(mtx) < 0) {
         return 2;
     }
-
+    if (sem_unlink(sem_name) < 0) {
+        return 1;
+    }
+    
     mtx = NULL;
 
     return 0;

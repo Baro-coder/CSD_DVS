@@ -5,7 +5,7 @@
 #define NAME_BUFF_SIZE 8
 
 /* *** Declarations *** */
-void __component_exit();
+void __component_exit(int status);
 
 
 /* *** Global Variables *** */
@@ -18,8 +18,6 @@ char __name[NAME_BUFF_SIZE];
 // PRIVATE
 // -- Signal handler
 void __sig_handler(int signo) {
-    int id = getpid() - getppid() - 1;
-    
     if (signo == SIGUSR1) {
         // Abort
         log_info(__name, "Abort!");
@@ -108,6 +106,8 @@ void __component_wait() {
 }
 // -- Component Process Exit
 void __component_exit(int status) {
+    
+
     log_info(__name, "Exit: Decision => %d", status);
     exit(status);
 }

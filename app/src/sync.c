@@ -1,6 +1,4 @@
 #include "sync.h"
-#include "votes.h"
-#include <sys/types.h>
 
 /* *** Global variables *** */
 // -- Common
@@ -10,11 +8,6 @@ int voters_count; // Processes count
 int** pipes;        // Pipes array
 
 // -- Sync
-// ---- Shared memory
-key_t shmkey;   // Shared memory key
-int shmid;      // Shared memory ID
-int* p;         // Shared var
-
 // ---- Sempahores
 sem_t** semaphores;  // Semaphores array
 char ** sem_names;  // Semaphores' names
@@ -34,16 +27,15 @@ int __init_control_mechanism(int i) {
 }
 // ---- Semaphore shutdown
 int __shutdown_control_mechanism(int i) {
-    // semaphore unlink
-    if(sem_unlink(sem_names[i]) < 0) {
-        return 1;
-    }
-
     // semaphore close
     if (sem_close(semaphores[i]) < 0) {
         return 2;
     }
-
+    // semaphore unlink
+    if(sem_unlink(sem_names[i]) < 0) {
+        return 1;
+    }
+    
     return 0;
 }
 
@@ -64,7 +56,7 @@ int pipes_init(int count) {
 }
 // ---- Shutdown
 int pipes_shutdown(int count) {
-    for (int i = 0; i < count; i++) {
+    for (int i = count - 1; i >= 0; i--) {
         close(pipes[i][CH_READ]);
         close(pipes[i][CH_WRITE]);
         free(pipes[i]);
@@ -78,18 +70,6 @@ int pipes_shutdown(int count) {
 // ---- Init
 int sync_init(int count) {
     voters_count = count; // Rewirite for children
-
-    /* ** Shared memory ** */
-    // -- Key
-    shmkey = ftok("/dev/shm", 5);
-    // -- ID
-    shmid = shmget(shmkey, sizeof(int), 0644 | IPC_CREAT);
-    if (shmid < 0) {
-        return 1;
-    }
-    // -- Attach
-    p = (int*) shmat(shmid, NULL, 0);
-    *p = 0;
 
     /* ** Semaphores ** */
     // -- Allocation
@@ -111,18 +91,11 @@ int sync_init(int count) {
 }
 // ---- Shutdown
 int sync_shutdown(int count) {
-    /* ** Shared memory ** */
-    // -- Detach
-    shmdt(p);
-    // -- Remove
-    shmctl(shmid, IPC_RMID, 0);
-
     /* ** Semaphores ** */
-    for (int i = 0; i < count; i++) {
+    for (int i = count - 1; i >= 0; i--) {
         __shutdown_control_mechanism(i);
         free(sem_names[i]);
     }
-    free(semaphores);
     free(sem_names);
 
     return 0;
@@ -212,6 +185,10 @@ void read_votes(const int id, const char* name, int* votes) {
     for (int i = 0; i < voters_count; i++) {
         memset(buffer, 0, BUFFER_SIZE);
         n_bytes = read(pipes[id][CH_READ], buffer, BUFFER_SIZE);
+        if(n_bytes <= 0) {
+            log_fatal(name, "Pipe read error! n_bytes = %d", n_bytes);
+            kill(getppid(), SIGUSR1);
+        }
         votes[i] = atoi(buffer);
     }
     free(buffer);
@@ -273,6 +250,10 @@ void read_votes_tables(const int id, const char* name, int votes_count, int** vo
         for (int j = 0; j < votes_count; j++) {
             memset(buffer, 0, BUFFER_SIZE);
             n_bytes = read(pipes[id][CH_READ], buffer, BUFFER_SIZE);
+            if(n_bytes <= 0) {
+                log_fatal(name, "Pipe read error! n_bytes = %d", n_bytes);
+                kill(getppid(), SIGUSR1);
+            }
             votes_tables[i][j] = atoi(buffer);
         }
     }

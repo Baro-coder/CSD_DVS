@@ -3,6 +3,7 @@
 
 /* *** Libraries *** */
 #include "app.h"
+#include "votes.h"
 
 /* *** Definitions *** */
 #define CH_READ 0   // pipe channel READ
@@ -18,7 +19,7 @@
 int pipes_init();
 int pipes_shutdown();
 
-// ---- Sync (Semaphores and shared memory)
+// ---- Sync (Semaphores)
 int sync_init();
 int sync_shutdown();
 

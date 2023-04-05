@@ -5,16 +5,14 @@
 
 /* *** Global variables *** */
 int processesCount;     // processes count
-pid_t* pids = NULL;     // PIDs array
+pid_t* pids;     // PIDs array
 
 /* *** Functions *** */
 // -- Signals: Broadcast
 void __send_broadcast_signal(int signo) {
-    if(pids != NULL) {
-        for(int i = 0; i < processesCount; i++) {
-            if (pids[i] != -1) {
-                kill(pids[i], signo);
-            }
+    for(int i = 0; i < processesCount; i++) {
+        if (pids[i] != -1) {
+            kill(pids[i], signo);
         }
     }
 }
@@ -113,6 +111,7 @@ int child_processes_init() {
         if (pid == 0) { 
             // Child process
             component_main(i, malfunctioned);
+            return 0;
         } else if (pid == -1) {
             // fork(): error -- Abort
             __send_broadcast_signal(SIGINT);

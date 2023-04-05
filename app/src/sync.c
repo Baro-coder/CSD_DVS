@@ -96,6 +96,7 @@ int sync_shutdown(int count) {
         __shutdown_control_mechanism(i);
         free(sem_names[i]);
     }
+    free(semaphores);
     free(sem_names);
 
     return 0;
@@ -193,11 +194,6 @@ void read_votes(const int id, const char* name, int* votes) {
     }
     free(buffer);
 
-    // for(int i = 0; i < voters_count; i++) {
-    //     printf(" %d", votes[i]);
-    // }
-    // printf(" ]\n");
-
     // Release next semaphore
     sem_post(semaphores[next_id]);
 }
@@ -289,16 +285,6 @@ int make_decision(const int id, const char* name, int votes_count, int** votes_t
             }
         }
     }
-
-    // for(i = 0; i < votes_count; i++) {
-    //     if (malfunctions[i]) {
-    //         printf("%d", i);
-    //     } else {
-    //         printf("*");
-    //     }
-    //     printf(" ");
-    // }
-    // printf("]\n");
 
     int votes_for = 0;
     int votes_against = 0;

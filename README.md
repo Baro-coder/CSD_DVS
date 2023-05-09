@@ -4,11 +4,14 @@
 
 ---
 
-## **Content**:
+## **Content:**
 
 ### 1. [Decription](#description)
+
 ### 2. [Installation](#installation)
+
 ### 3. [Example Output](#example-output)
+
 ### 4. [Documentation](https://github.com/Baro-coder/CSD_DVS/tree/master/docs/)
 
 ---
@@ -45,41 +48,47 @@ Project was developed on **64-bit Ubuntu 22.04 OS**, but every **Debian-based 64
 
 ### **1. Clone repository**
 
-**1.1. Download the project repository**
+1.1. **Download the project repository**
+
 ``` console
 git clone https://github.com/Baro-coder/CSD_DVS.git
 ```
 
-**1.2. Change current directory to project workdir**
+1.2. **Change current directory to project workdir**
+
 ``` console
 cd ./CSD_DVS/
 ```
 
 ### **2. Build**
 
-**2.1. Make project `build/` directory**
+2.1. **Make project `build/` directory**
+
 ```console
 mkdir ./build/
 ```
 
-**2.2. Change current directory to `build/`**
+2.2. **Change current directory to `build/`**
+
 ```console
 cd ./build/
 ```
 
-**2.3. Build project structure with *CMake***
+2.3. **Build project structure with *CMake***
+
 ```console
 cmake ..
 ```
 
-**2.4. Build project with Makefiles**
+2.4. **Build project with Makefiles**
+
 ```console
 make
 ```
 
 ### **3. Run**
 
-**Usage**
+#### **Usage**
 
 Child components count is set to 6 by default. So default run command will fork 6 of children processes:
 
@@ -88,7 +97,6 @@ Child components count is set to 6 by default. So default run command will fork 
 ``` console
 ./app/app
 ```
-
 
 There is opportunity to set components count with positional argument (value must be in range <3, 100>).
 
@@ -102,14 +110,6 @@ There is opportunity to set components count with positional argument (value mus
 
 ## **Example Output**
 
-*CMD*
-``` console
-./app/app
-```
-
-**Outputs:**
-
-*DEBUG:*
 ``` text
 [5-04-2023 01:17:28] : [ INFO  ] : [ App ] : Main init...
 [5-04-2023 01:17:28] : [ DEBUG ] : [ App ] : Args parsing...
@@ -196,70 +196,6 @@ There is opportunity to set components count with positional argument (value mus
 [5-04-2023 01:17:29] : [ DEBUG ] : [ App ] : Pipes closing...
 [5-04-2023 01:17:29] : [ DEBUG ] : [ App ] : Control mechanisms closing...
 [5-04-2023 01:17:29] : [ INFO  ] : [ App ] : Shutdown.
-```
-
-
-*INFO*
-``` text
-[5-04-2023 01:19:06] : [ INFO  ] : [ App ] : Main init...
-[5-04-2023 01:19:06] : [ INFO  ] : [ App ] : Components Pre-init...
-[5-04-2023 01:19:06] : [ INFO  ] : [*C-0 ] : Init...
-[5-04-2023 01:19:06] : [ INFO  ] : [*C-0 ] : Ready.
-[5-04-2023 01:19:06] : [ INFO  ] : [ C-2 ] : Init...
-[5-04-2023 01:19:06] : [ INFO  ] : [ C-2 ] : Ready.
-[5-04-2023 01:19:06] : [ INFO  ] : [ C-3 ] : Init...
-[5-04-2023 01:19:06] : [ INFO  ] : [ C-3 ] : Ready.
-[5-04-2023 01:19:06] : [ INFO  ] : [ C-4 ] : Init...
-[5-04-2023 01:19:06] : [ INFO  ] : [ C-4 ] : Ready.
-[5-04-2023 01:19:06] : [ INFO  ] : [ C-5 ] : Init...
-[5-04-2023 01:19:06] : [ INFO  ] : [ C-5 ] : Ready.
-[5-04-2023 01:19:06] : [ INFO  ] : [ C-1 ] : Init...
-[5-04-2023 01:19:06] : [ INFO  ] : [ C-1 ] : Ready.
-[5-04-2023 01:19:07] : [ INFO  ] : [ App ] : Signal received: 12 | Voting start.
-[5-04-2023 01:19:07] : [ INFO  ] : [*C-0 ] : Vote: 0
-[5-04-2023 01:19:07] : [ INFO  ] : [ C-1 ] : Vote: 0
-[5-04-2023 01:19:07] : [ INFO  ] : [ C-2 ] : Vote: 0
-[5-04-2023 01:19:07] : [ INFO  ] : [ C-3 ] : Vote: 0
-[5-04-2023 01:19:07] : [ INFO  ] : [ C-4 ] : Vote: 0
-[5-04-2023 01:19:07] : [ INFO  ] : [ C-5 ] : Vote: 0
-[5-04-2023 01:19:07] : [ INFO  ] : [*C-0 ] : Distributing vote...
-[5-04-2023 01:19:07] : [ INFO  ] : [ C-1 ] : Distributing vote...
-[5-04-2023 01:19:07] : [ INFO  ] : [ C-2 ] : Distributing vote...
-[5-04-2023 01:19:07] : [ INFO  ] : [ C-3 ] : Distributing vote...
-[5-04-2023 01:19:07] : [ INFO  ] : [ C-4 ] : Distributing vote...
-[5-04-2023 01:19:07] : [ INFO  ] : [ C-5 ] : Distributing vote...
-[5-04-2023 01:19:07] : [ INFO  ] : [*C-0 ] : Reading votes...
-[5-04-2023 01:19:07] : [ INFO  ] : [ C-1 ] : Reading votes...
-[5-04-2023 01:19:07] : [ INFO  ] : [ C-2 ] : Reading votes...
-[5-04-2023 01:19:07] : [ INFO  ] : [ C-3 ] : Reading votes...
-[5-04-2023 01:19:07] : [ INFO  ] : [ C-4 ] : Reading votes...
-[5-04-2023 01:19:07] : [ INFO  ] : [ C-5 ] : Reading votes...
-[5-04-2023 01:19:07] : [ INFO  ] : [*C-0 ] : Distributing votes table...
-[5-04-2023 01:19:07] : [ INFO  ] : [ C-1 ] : Distributing votes table...
-[5-04-2023 01:19:07] : [ INFO  ] : [ C-2 ] : Distributing votes table...
-[5-04-2023 01:19:07] : [ INFO  ] : [ C-3 ] : Distributing votes table...
-[5-04-2023 01:19:07] : [ INFO  ] : [ C-4 ] : Distributing votes table...
-[5-04-2023 01:19:07] : [ INFO  ] : [ C-5 ] : Distributing votes table...
-[5-04-2023 01:19:07] : [ INFO  ] : [*C-0 ] : Reading votes tables...
-[5-04-2023 01:19:07] : [ INFO  ] : [ C-1 ] : Reading votes tables...
-[5-04-2023 01:19:07] : [ INFO  ] : [ C-2 ] : Reading votes tables...
-[5-04-2023 01:19:07] : [ INFO  ] : [ C-3 ] : Reading votes tables...
-[5-04-2023 01:19:07] : [ INFO  ] : [ C-4 ] : Reading votes tables...
-[5-04-2023 01:19:07] : [ INFO  ] : [ C-5 ] : Reading votes tables...
-[5-04-2023 01:19:07] : [ INFO  ] : [*C-0 ] : Making decision...
-[5-04-2023 01:19:07] : [ INFO  ] : [*C-0 ] : Exit: Decision => 0
-[5-04-2023 01:19:07] : [ INFO  ] : [ C-1 ] : Making decision...
-[5-04-2023 01:19:07] : [ INFO  ] : [ C-1 ] : Exit: Decision => 0
-[5-04-2023 01:19:07] : [ INFO  ] : [ C-2 ] : Making decision...
-[5-04-2023 01:19:07] : [ INFO  ] : [ C-2 ] : Exit: Decision => 0
-[5-04-2023 01:19:07] : [ INFO  ] : [ C-3 ] : Making decision...
-[5-04-2023 01:19:07] : [ INFO  ] : [ C-3 ] : Exit: Decision => 0
-[5-04-2023 01:19:07] : [ INFO  ] : [ C-4 ] : Making decision...
-[5-04-2023 01:19:07] : [ INFO  ] : [ C-4 ] : Exit: Decision => 0
-[5-04-2023 01:19:07] : [ INFO  ] : [ C-5 ] : Making decision...
-[5-04-2023 01:19:07] : [ INFO  ] : [ C-5 ] : Exit: Decision => 0
-[5-04-2023 01:19:07] : [ INFO  ] : [ App ] : Cleaning... (3)
-[5-04-2023 01:19:07] : [ INFO  ] : [ App ] : Shutdown.
 ```
 
 ---

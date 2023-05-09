@@ -1,8 +1,7 @@
 # ***App - Documentation***
 
-## **Content**:
+## **Content:**
 
 > To develop...
 
 ---
-

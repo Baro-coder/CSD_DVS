@@ -9,29 +9,29 @@ int main(int argc, char** argv) {
     /* *** Init *** */
     status = app_init(argc, argv);
     if (status == 1) {
-        log_error(MASTER_NAME, "Logging thread-safety init! Code: %d", status);
+        logs_log_error(MASTER_NAME, "Logging thread-safety init! Code: %d", status);
         exit(status);
     } else if (status == 2) {
-        log_error(MASTER_NAME, "Invalid arguments error! Code: %d", status);
+        logs_log_error(MASTER_NAME, "Invalid arguments error! Code: %d", status);
         aux_status = clean(1);
         if (aux_status != 0) {
-            log_error(MASTER_NAME, "Cleaning error! Code: %d", aux_status);
+            logs_log_error(MASTER_NAME, "Cleaning error! Code: %d", aux_status);
             exit(aux_status);
         }
         exit(status);
     } else if (status == 3) {
-        log_error(MASTER_NAME, "Pipes init! Code: %d", status);
+        logs_log_error(MASTER_NAME, "Pipes init! Code: %d", status);
         aux_status = clean(1);
         if (aux_status != 0) {
-            log_error(MASTER_NAME, "Cleaning error! Code: %d", aux_status);
+            logs_log_error(MASTER_NAME, "Cleaning error! Code: %d", aux_status);
             exit(aux_status);
         }
         exit(status);
     } else if (status == 4) {
-        log_error(MASTER_NAME, "Control mechanisms init! Code: %d", status);
+        logs_log_error(MASTER_NAME, "Control mechanisms init! Code: %d", status);
         aux_status = clean(2);
         if (aux_status != 0) {
-            log_error(MASTER_NAME, "Cleaning error! Code: %d", aux_status);
+            logs_log_error(MASTER_NAME, "Cleaning error! Code: %d", aux_status);
             exit(aux_status);
         }
         exit(status);
@@ -40,10 +40,10 @@ int main(int argc, char** argv) {
     /* *** Children init *** */
     status = child_processes_init();
     if (status != 0) {
-        log_error(MASTER_NAME, "Components Pre-init error! Code: %d", status);
+        logs_log_error(MASTER_NAME, "Components Pre-init error! Code: %d", status);
         aux_status = clean(3);
         if (aux_status != 0) {
-            log_error(MASTER_NAME, "Cleaning error! Code: %d", aux_status);
+            logs_log_error(MASTER_NAME, "Cleaning error! Code: %d", aux_status);
             exit(aux_status);
         }
         exit(status);
@@ -55,11 +55,11 @@ int main(int argc, char** argv) {
     /* *** Cleaning *** */
     status = clean(3);
     if (status != 0) {
-        log_error(MASTER_NAME, "Cleaning error! Code: %d", status);
+        logs_log_error(MASTER_NAME, "Cleaning error! Code: %d", status);
         exit(status);
     }
 
     /* *** Exit *** */
-    log_info(MASTER_NAME, "Shutdown.");
+    logs_log_info(MASTER_NAME, "Shutdown.");
     exit(0);
 }

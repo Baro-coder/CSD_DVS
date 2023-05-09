@@ -1,6 +1,7 @@
 #include "component.h"
 #include "sync.h"
 #include "votes.h"
+#include <stdio.h>
 
 #define NAME_BUFF_SIZE 8
 
@@ -20,7 +21,7 @@ char __name[NAME_BUFF_SIZE];
 void __sig_handler(int signo) {
     if (signo == SIGUSR1) {
         // Abort
-        log_info(__name, "Abort!");
+        logs_log_info(__name, "Abort!");
         __component_exit(-1);
     } else if (signo == SIGUSR2) {
         // Voting start
@@ -46,14 +47,15 @@ void __voting_process() {
     distribute_votes_table(__id, __name, voters_count, votes);
 
     // -- Read others votes tables
+    // ---- Memory allocation
     int** votes_tables = (int**) malloc(voters_count * sizeof(int*));
     for (int i = 0; i < voters_count; i++) {
         votes_tables[i] = (int*) malloc(voters_count * sizeof(int));
     }
-
+    // ---- Pipe reading
     read_votes_tables(__id, __name, voters_count, votes_tables);
 
-    // -- Make final decision
+    // -- Final decision
     int decision = -1;
     decision = make_decision(__id, __name, voters_count, votes_tables);
 
@@ -79,7 +81,7 @@ void __component_init(int id, int malfunctioned) {
         sprintf(__name, " C-%d ", id);
     }
 
-    log_info(__name, "Init...");
+    logs_log_info(__name, "Init...");
 
     __id = id;
 
@@ -93,7 +95,7 @@ void __component_init(int id, int malfunctioned) {
 }
 // -- Component Process Waiting
 void __component_wait() {
-    log_info(__name, "Ready.");
+    logs_log_info(__name, "Ready.");
 
     while(1) { 
         // Waiting for signal to
@@ -108,7 +110,7 @@ void __component_wait() {
 void __component_exit(int status) {
     
 
-    log_info(__name, "Exit: Decision => %d", status);
+    logs_log_info(__name, "Exit: Decision => %d", status);
     exit(status);
 }
 

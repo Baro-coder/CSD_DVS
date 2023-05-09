@@ -128,7 +128,7 @@ int make_vote(const int id, const char* name) {
     fclose(fp);
 
     vote %= 2;
-    log_info(name, "Vote: %d", vote);
+    logs_log_info(name, "Vote: %d", vote);
 
     sem_post(semaphores[next_id]);
     
@@ -145,7 +145,7 @@ int distribute_vote(const int id, const char* name, int vote, int malfunctioned)
     // Wait for appropriate semaphore
     sem_wait(semaphores[id]);
 
-    log_info(name, "Distributing vote...");
+    logs_log_info(name, "Distributing vote...");
 
     // Vote distribution
     char* buffer = (char*) malloc(BUFFER_SIZE);
@@ -178,7 +178,7 @@ void read_votes(const int id, const char* name, int* votes) {
     // Wait for appropriate semaphore
     sem_wait(semaphores[id]);
 
-    log_info(name, "Reading votes...");
+    logs_log_info(name, "Reading votes...");
 
     // Votes reading
     int n_bytes = -1;
@@ -187,7 +187,7 @@ void read_votes(const int id, const char* name, int* votes) {
         memset(buffer, 0, BUFFER_SIZE);
         n_bytes = read(pipes[id][CH_READ], buffer, BUFFER_SIZE);
         if(n_bytes <= 0) {
-            log_fatal(name, "Pipe read error! n_bytes = %d", n_bytes);
+            logs_log_fatal(name, "Pipe read error! n_bytes = %d", n_bytes);
             kill(getppid(), SIGUSR1);
         }
         votes[i] = atoi(buffer);
@@ -208,7 +208,7 @@ void distribute_votes_table(const int id, const char* name, int votes_count, int
     // Wait for appropriate semaphore
     sem_wait(semaphores[id]);
 
-    log_info(name, "Distributing votes table...");
+    logs_log_info(name, "Distributing votes table...");
 
     // Votes table distribution
     char* buffer = (char*) malloc(BUFFER_SIZE);
@@ -236,7 +236,7 @@ void read_votes_tables(const int id, const char* name, int votes_count, int** vo
     // Wait for appropriate semaphore
     sem_wait(semaphores[id]);
 
-    log_info(name, "Reading votes tables...");
+    logs_log_info(name, "Reading votes tables...");
 
     // Votes reading
     int n_bytes = -1;
@@ -247,7 +247,7 @@ void read_votes_tables(const int id, const char* name, int votes_count, int** vo
             memset(buffer, 0, BUFFER_SIZE);
             n_bytes = read(pipes[id][CH_READ], buffer, BUFFER_SIZE);
             if(n_bytes <= 0) {
-                log_fatal(name, "Pipe read error! n_bytes = %d", n_bytes);
+                logs_log_fatal(name, "Pipe read error! n_bytes = %d", n_bytes);
                 kill(getppid(), SIGUSR1);
             }
             votes_tables[i][j] = atoi(buffer);
@@ -269,9 +269,9 @@ int make_decision(const int id, const char* name, int votes_count, int** votes_t
     // // Wait for appropriate semaphore
     sem_wait(semaphores[id]);
 
-    log_info(name, "Making decision...");
+    logs_log_info(name, "Making decision...");
     
-    log_debug(name, "Checking for malfunctions...");
+    logs_log_debug(name, "Checking for malfunctions...");
 
     int* malfunctions = (int*) malloc(votes_count * sizeof(int));
     memset(malfunctions, 0, votes_count * sizeof(int));
@@ -290,7 +290,7 @@ int make_decision(const int id, const char* name, int votes_count, int** votes_t
     int votes_against = 0;
     int votes_ignored = 0;
 
-    log_debug(name, "Votes counting...");
+    logs_log_debug(name, "Votes counting...");
     for (i = 0; i < votes_count; i++) {
         if (malfunctions[i] == 0) {
             if (votes_tables[0][i] == VOTE_FOR) {
@@ -309,7 +309,7 @@ int make_decision(const int id, const char* name, int votes_count, int** votes_t
     sem_post(semaphores[next_id]);
 
     // Making decision
-    log_debug(name, "Counted votes: FOR(%d), AGAINST(%d), IGNORED(%d)", 
+    logs_log_debug(name, "Counted votes: FOR(%d), AGAINST(%d), IGNORED(%d)", 
         votes_for,
         votes_against,
         votes_ignored);

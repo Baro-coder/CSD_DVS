@@ -20,30 +20,30 @@ void __send_broadcast_signal(int signo) {
 // -- Signals: Handler
 void __master_sig_handler(int signo) {
     if(signo == SIGINT) {
-        log_info(MASTER_NAME, "Signal received: %d | Abort!", signo);
+        logs_log_info(MASTER_NAME, "Signal received: %d | Abort!", signo);
         __send_broadcast_signal(SIGUSR1);
     } else if (signo == SIGUSR1) {
-        log_error(MASTER_NAME, "Signal received: %d | Abort!", signo);
+        logs_log_error(MASTER_NAME, "Signal received: %d | Abort!", signo);
         __send_broadcast_signal(signo);
     } else if (signo == SIGUSR2) {
-        log_info(MASTER_NAME, "Signal received: %d | Voting start.", signo);
+        logs_log_info(MASTER_NAME, "Signal received: %d | Voting start.", signo);
         __send_broadcast_signal(signo);
     } else {
-        log_warn(MASTER_NAME, "Signal received: %d | Signal ignored.", signo);
+        logs_log_warn(MASTER_NAME, "Signal received: %d | Signal ignored.", signo);
     }
 }
 
 // -- App: Main init
 int app_init(int argc, char** argv) {
-    log_info(MASTER_NAME, "Main init...");
+    logs_log_info(MASTER_NAME, "Main init...");
 
     // -- liblogs thread-safety semaphore create
-    if (logging_threads_safety_enable("/sem.liblogs") != 0) {
+    if (logs_threads_safety_enable("/sem.liblogs") != 0) {
         return 1;
     }
 
     // -- Args parse: processesCount
-    log_debug(MASTER_NAME, "Args parsing...");
+    logs_log_debug(MASTER_NAME, "Args parsing...");
     if (argc == 1) {
         processesCount = PROCESSES_COUNT_DEFAULT;
     } else if (argc == 2) {
@@ -56,19 +56,19 @@ int app_init(int argc, char** argv) {
     }
 
     // -- Signals handler
-    log_debug(MASTER_NAME, "Signals handling...");
+    logs_log_debug(MASTER_NAME, "Signals handling...");
     signal(SIGINT, __master_sig_handler);
     signal(SIGUSR1, __master_sig_handler);
     signal(SIGUSR2, __master_sig_handler);
 
     // -- Pipes
-    log_debug(MASTER_NAME, "Pipes init...");
+    logs_log_debug(MASTER_NAME, "Pipes init...");
     if (pipes_init(processesCount)) {
         return 3;
     }
 
     // -- Semaphores
-    log_debug(MASTER_NAME, "Control mechanisms init...");
+    logs_log_debug(MASTER_NAME, "Control mechanisms init...");
     if (sync_init(processesCount)) {
         return 4;
     }
@@ -78,7 +78,7 @@ int app_init(int argc, char** argv) {
 
 // -- App: Children init
 int child_processes_init() {
-    log_info(MASTER_NAME, "Components Pre-init...");
+    logs_log_info(MASTER_NAME, "Components Pre-init...");
 
     // Children PIDs array
     pids = (pid_t*) malloc(processesCount * sizeof(pid_t));
@@ -95,7 +95,7 @@ int child_processes_init() {
     int mal_count = (int)(a);
     int malfunctioned = 0;
 
-    log_debug(MASTER_NAME, "Malfunctioned components count: %d", mal_count);
+    logs_log_debug(MASTER_NAME, "Malfunctioned components count: %d", mal_count);
 
     // -- Children fork
     srand(time(NULL));
@@ -141,15 +141,15 @@ void child_processes_wait() {
 // -- App: Resources clean
 int clean(int level) {
     /* ** Cleaning ** */
-    log_info(MASTER_NAME, "Cleaning... (%d)", level);
+    logs_log_info(MASTER_NAME, "Cleaning... (%d)", level);
     
     // -- Memory
     free(pids);
 
     // -- liblogs thread-safety semaphore destroy
     if (level >= 1) {
-        log_debug(MASTER_NAME, "Logging thread-safety clear...");
-        int logthcl_stat = logging_threads_safety_clear("/sem.liblogs");
+        logs_log_debug(MASTER_NAME, "Logging thread-safety clear...");
+        int logthcl_stat = logs_threads_safety_disable("/sem.liblogs");
         if (logthcl_stat == 1) {
             return 1;
         } else if (logthcl_stat == 2) {
@@ -159,7 +159,7 @@ int clean(int level) {
     
     // -- Pipes shutdown
     if (level >= 2) {
-        log_debug(MASTER_NAME, "Pipes closing...");
+        logs_log_debug(MASTER_NAME, "Pipes closing...");
         if (pipes_shutdown(processesCount) != 0) {
             return 3;
         }
@@ -169,7 +169,7 @@ int clean(int level) {
 
     // -- Semaphores shutdown
     if (level == 3) {
-        log_debug(MASTER_NAME, "Control mechanisms closing...");
+        logs_log_debug(MASTER_NAME, "Control mechanisms closing...");
         if (sync_shutdown(processesCount) != 0) {
             return 4;
         } else {

@@ -8,7 +8,7 @@
 
 ### 3. [Workflow chart](#workflow-chart)
 
-### 4. [Component workflow](component-workflow)
+### 4. [Component workflow](#component-workflow)
 
 ---
 
@@ -153,6 +153,10 @@ Votes definitions.
 ---
 
 ## **Workflow chart**
+
+<p align=center>
+    <img src="https://raw.githubusercontent.com/Baro-coder/CSD_DVS/master/docs/img/workflow_chart.png"></img>
+</p>
 
 ---
 

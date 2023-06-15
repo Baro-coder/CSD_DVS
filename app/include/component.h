@@ -4,8 +4,7 @@
 /* *** Libraries *** */
 #include "app.h"
 
-/* *** Declarations *** */
-// -- Functions
+// -- Component process main function
 void* component_main(int id, int malfunctioned);
 
 #endif

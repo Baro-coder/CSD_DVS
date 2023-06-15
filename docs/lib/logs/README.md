@@ -17,7 +17,7 @@
 
 ### **Description**
 
-Simple logging library developed in C. 
+Simple logging library developed in C.
 
 This library is taken from another private project which is available [here]([https://](https://github.com/Baro-coder/C_LibLogs)).
 
@@ -145,7 +145,7 @@ sudo ./install.sh
 
 ### **Manual**
 
-### 1. Clone repository
+#### 1. Clone repository
 
 1.1. Download repository:
 
@@ -159,7 +159,7 @@ git clone https://github.com/Baro-coder/C_LibLogs
 cd ./C_LibLogs/
 ```
 
-### 2. Build
+#### 2. Build
 
 2.1. Compile source:
 
@@ -173,7 +173,7 @@ gcc -c ./logs/logs.c -o ./logs/logs.o
 ar crs ./logs/liblogs.a ./logs/logs.o
 ```
 
-### 3. Link
+#### 3. Link
 
 3.1. Copy header file to include path:
 

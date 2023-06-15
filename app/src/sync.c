@@ -1,4 +1,7 @@
 #include "sync.h"
+#include "logs.h"
+#include <stdlib.h>
+#include <string.h>
 
 /* *** Global variables *** */
 // -- Common
@@ -194,6 +197,20 @@ void read_votes(const int id, const char* name, int* votes) {
     }
     free(buffer);
 
+    // Votes print
+    buffer = (char*) malloc((3 * voters_count) * sizeof(int));
+    memset(buffer, 0, (5 * voters_count) * sizeof(int));
+
+    sprintf(buffer, "Votes: [ ");
+    for(int i = 0; i < voters_count; i++) {
+        sprintf(buffer, "%s%d ", buffer, votes[i]);
+    }
+    sprintf(buffer, "%s]", buffer);
+
+    logs_log_debug(name, "%s", buffer);
+
+    free(buffer);
+
     // Release next semaphore
     sem_post(semaphores[next_id]);
 }
@@ -211,13 +228,13 @@ void distribute_votes_table(const int id, const char* name, int votes_count, int
     logs_log_info(name, "Distributing votes table...");
 
     // Votes table distribution
-    char* buffer = (char*) malloc(BUFFER_SIZE);
+    char* buffer = (char*) malloc(2 * sizeof(int));
 
     for (int i = 0; i < votes_count; i++) {
         for (int j = 0; j < votes_count; j++) {
-            memset(buffer, 0, BUFFER_SIZE);
-            sprintf(buffer, "%d", votes_table[i]);
-            write(pipes[j][CH_WRITE], buffer, BUFFER_SIZE);
+          memset(buffer, 0, 2 * sizeof(int));
+          sprintf(buffer, "%d", votes_table[i]);
+          write(pipes[j][CH_WRITE], buffer, 2 * sizeof(int));
         }
     }
     free(buffer);
@@ -253,6 +270,24 @@ void read_votes_tables(const int id, const char* name, int votes_count, int** vo
             votes_tables[i][j] = atoi(buffer);
         }
     }
+    free(buffer);
+
+    // Print tables
+    buffer = (char*) malloc((votes_count * votes_count * 3) * sizeof(int));
+    memset(buffer, 0, (votes_count * votes_count * 3) * sizeof(int));
+
+    sprintf(buffer, "[ ");
+    for (int i = 0; i < votes_count; i++) {
+        sprintf(buffer, "%s[ ", buffer);
+        for (int j = 0; j < votes_count; j++) {
+            sprintf(buffer, "%s%d ", buffer, votes_tables[i][j]);
+        }
+        sprintf(buffer, "%s] ", buffer);
+    }
+    sprintf(buffer, "%s ]", buffer);
+
+    logs_log_debug(name, "%s", buffer);
+
     free(buffer);
 
     // Release next semaphore

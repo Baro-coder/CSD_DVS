@@ -10,9 +10,6 @@
 #define CH_WRITE 1  // pipe channel WRITE
 #define BUFFER_SIZE 5   // Pipe message buffer size [B]
 
-
-/* *** Declarations *** */
-
 // -- Functions
 
 // ---- Pipes
